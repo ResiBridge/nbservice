@@ -225,3 +225,49 @@ class RelationListView(generic.ObjectListView):
 
 class RelationView(generic.ObjectView):
     queryset = models.Relation.objects.all()
+
+
+class GlobalDiagramView(generic.ObjectListView):
+    """
+    Global view showing all services and their relationships in one diagram
+    """
+    queryset = models.Service.objects.all()
+    table = tables.ServiceTable
+    template_name = "nb_service/global_diagram.html"
+
+    def get_extra_context(self, request):
+        # Generate Mermaid diagram with ALL services and relations
+        graph = "graph TB\n"
+        open_shape = ["(", "([", "[[", "[(", "((", ">", "{", "{{", "[/", "[/"]
+        close_shape = [")", "])", "]]", ")]", "))", "]", "}", "}}", "/]", "\\]"]
+        arrow_shape = ["-->", "---", "-.->", "-.-"]
+        nodes = {}
+
+        # Get all relations
+        all_relations = models.Relation.objects.all()
+
+        for rel in all_relations:
+            src_node = rel.source.service.name.replace(" ", "_")
+            dest_node = rel.destination.service.name.replace(" ", "_")
+
+            if src_node not in nodes:
+                nodes[src_node] = rel.source.service.get_absolute_url()
+            if dest_node not in nodes:
+                nodes[dest_node] = rel.destination.service.get_absolute_url()
+
+            # Build the graph edge
+            graph += f"    {src_node}{open_shape[rel.source_shape -1]}"
+            graph += f"{rel.source.service.name}{close_shape[rel.source_shape -1]}"
+            graph += f" {arrow_shape[rel.connector_shape -1]} "
+
+            if rel.link_text != "":
+                graph += f"| {rel.link_text} |"
+
+            graph += f"{dest_node}{open_shape[rel.destination_shape -1]}"
+            graph += f"{rel.destination.service.name}{close_shape[rel.destination_shape -1]}\n"
+
+        # Add clickable links
+        for node in nodes:
+            graph += f'click {node} "{nodes[node]}"\n'
+
+        return {'diagram': graph}

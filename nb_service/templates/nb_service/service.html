@@ -2,28 +2,27 @@
 {% load render_table from django_tables2 %}
 
 {% block extra_controls %}
-<div class="dropdown">
-    <button id="add-device-components" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="mdi mdi-plus-thick" aria-hidden="true"></i> Add Components
+<div class="btn-group">
+    {# QOL: Quick Relation Add button #}
+    <a href="{% url 'plugins:nb_service:relation_add' %}?service={{ object.pk }}&return_url={{ object.get_absolute_url }}" class="btn btn-success">
+        <i class="mdi mdi-plus-thick" aria-hidden="true"></i> Quick Add Relation
+    </a>
+    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="visually-hidden">More</span>
     </button>
-    <ul class="dropdown-menu" aria-labeled-by="add-device-components">
+    <ul class="dropdown-menu">
         <li>
             <a class="dropdown-item" href="{% url 'plugins:nb_service:ic_add' %}?service={{ object.pk }}&return_url={{ object.get_absolute_url }}">
-                Configuration Item
+                <i class="mdi mdi-file-tree"></i> Add Infrastructure Component
             </a>
         </li>
         <li>
             <a class="dropdown-item" href="{% url 'plugins:nb_service:pentest_add' %}?service={{ object.pk }}&return_url={{ object.get_absolute_url }}">
-                Vulnerability assessment
-            </a>
-        </li>
-        <li>
-            <a class="dropdown-item" href="{% url 'plugins:nb_service:relation_add' %}?service={{ object.pk }}&return_url={{ object.get_absolute_url }}">
-                Configuration Item Relationship
+                <i class="mdi mdi-shield-alert"></i> Add Vulnerability Assessment
             </a>
         </li>
     </ul>
-</div>  
+</div>
 {% endblock %}
 
 
@@ -37,6 +36,41 @@
                         <tr>
                             <td>Name</td>
                             <td>{{ object.name }}</td>
+                        </tr>
+                        <tr>
+                            <td>Status</td>
+                            <td>
+                                {% if object.status == 'active' %}
+                                    <span class="badge text-bg-success">Active</span>
+                                {% elif object.status == 'inactive' %}
+                                    <span class="badge text-bg-secondary">Inactive</span>
+                                {% elif object.status == 'deprecated' %}
+                                    <span class="badge text-bg-warning">Deprecated</span>
+                                {% elif object.status == 'planned' %}
+                                    <span class="badge text-bg-primary">Planned</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Criticality</td>
+                            <td>
+                                {% if object.criticality == 'critical' %}
+                                    <span class="badge text-bg-danger">Critical</span>
+                                {% elif object.criticality == 'high' %}
+                                    <span class="badge text-bg-warning">High</span>
+                                {% elif object.criticality == 'medium' %}
+                                    <span class="badge text-bg-info">Medium</span>
+                                {% elif object.criticality == 'low' %}
+                                    <span class="badge text-bg-success">Low</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Dependencies</td>
+                            <td>
+                                <span class="badge text-bg-info">↓ {{ object.get_upstream_count }} services</span>
+                                <span class="badge text-bg-warning">↑ {{ object.get_downstream_count }} dependents</span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Backup Profile</td>

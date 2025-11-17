@@ -14,6 +14,7 @@ from . import models
 app_name = 'nb_service'
 
 urlpatterns = [
+    path("diagram/", views.GlobalDiagramView.as_view(), name="global_diagram"),
     path("service/", views.ServiceListView.as_view(), name="service_list"),
     path('service/<int:pk>/', include(get_model_urls(app_name, 'service'))),
     path("service/<int:pk>/", views.ServiceView.as_view(), name="service"),

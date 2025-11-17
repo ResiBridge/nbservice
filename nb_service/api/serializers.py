@@ -120,6 +120,8 @@ class ServiceSerializer(NetBoxModelSerializer):
     clients = TenantSerializer(many=True, required=False, allow_null=True, nested=True)
     comments = serializers.CharField()
     backup_profile = serializers.CharField(required=False)
+    status = ChoiceField(choices=choices.ServiceStatusChoices, required=False)
+    criticality = ChoiceField(choices=choices.ServiceCriticalityChoices, required=False)
 
     def get_display(self, obj):
         return obj.name
@@ -146,28 +148,49 @@ class ServiceSerializer(NetBoxModelSerializer):
 
     class Meta:
         model = models.Service
-        fields = ["id", "display", "name", "clients", "comments", "backup_profile"]
+        fields = ["id", "display", "name", "status", "criticality", "clients", "comments", "backup_profile"]
 
 
-class RelationSerializer(serializers.Serializer):
+class RelationSerializer(NetBoxModelSerializer):
     id = serializers.IntegerField(read_only=True)
     service = serializers.SlugRelatedField(
         slug_field="name", queryset=models.Service.objects.all()
     )
 
+    # Nested source and destination with service names
+    source_service = serializers.CharField(source="source.service.name", read_only=True)
+    source_service_id = serializers.IntegerField(source="source.service.id", read_only=True)
+    source_ic = serializers.CharField(source="source.name", read_only=True)
+    source_ic_id = serializers.IntegerField(source="source.id", read_only=True)
+
+    destination_service = serializers.CharField(source="destination.service.name", read_only=True)
+    destination_service_id = serializers.IntegerField(source="destination.service.id", read_only=True)
+    destination_ic = serializers.CharField(source="destination.name", read_only=True)
+    destination_ic_id = serializers.IntegerField(source="destination.id", read_only=True)
+
+    link_text = serializers.CharField(required=False, allow_blank=True)
+
+    # Add display method
+    display = serializers.SerializerMethodField("get_display")
+
     def get_display(self, obj):
-        return obj.name
+        return f"{obj.source.service.name} → {obj.destination.service.name}"
 
     class Meta:
         model = models.Relation
         fields = [
             "id",
             "display",
-            "name",
             "service",
-            "source",
+            "source_service",
+            "source_service_id",
+            "source_ic",
+            "source_ic_id",
+            "destination_service",
+            "destination_service_id",
+            "destination_ic",
+            "destination_ic_id",
             "source_shape",
-            "destination",
             "destination_shape",
             "connector_shape",
             "link_text",

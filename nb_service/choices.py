@@ -8,6 +8,34 @@ OBJETO_ASSIGNMENT_MODELS = Q(
     Q(app_label='nb_service', model='application')
 )
 
+class ServiceStatusChoices(ChoiceSet):
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
+    DEPRECATED = 'deprecated'
+    PLANNED = 'planned'
+
+    CHOICES = (
+        (ACTIVE, 'Active', 'green'),
+        (INACTIVE, 'Inactive', 'gray'),
+        (DEPRECATED, 'Deprecated', 'orange'),
+        (PLANNED, 'Planned', 'blue'),
+    )
+
+
+class ServiceCriticalityChoices(ChoiceSet):
+    CRITICAL = 'critical'
+    HIGH = 'high'
+    MEDIUM = 'medium'
+    LOW = 'low'
+
+    CHOICES = (
+        (CRITICAL, 'Critical', 'red'),
+        (HIGH, 'High', 'orange'),
+        (MEDIUM, 'Medium', 'yellow'),
+        (LOW, 'Low', 'green'),
+    )
+
+
 class PenTestChoices(ChoiceSet):
 
     APROVED = 1

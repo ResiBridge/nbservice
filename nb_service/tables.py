@@ -13,13 +13,34 @@ class ServiceTable(NetBoxTable):
 
     name = tables.LinkColumn(verbose_name="Service")
     id = ToggleColumn()
+    status = columns.ChoiceFieldColumn(verbose_name="Status")
+    criticality = columns.ChoiceFieldColumn(verbose_name="Criticality")
     backup_profile = tables.Column(verbose_name="Backup Profile")
 
-    
+    # QOL: Dependency count columns
+    upstream_count = tables.Column(
+        verbose_name="Dependencies ↓",
+        empty_values=(),
+        orderable=False,
+        accessor='get_upstream_count'
+    )
+    downstream_count = tables.Column(
+        verbose_name="Dependents ↑",
+        empty_values=(),
+        orderable=False,
+        accessor='get_downstream_count'
+    )
+
+
     class Meta(NetBoxTable.Meta):
         model = models.Service
         fields = (
+            "id",
             "name",
+            "status",
+            "criticality",
+            "upstream_count",
+            "downstream_count",
             "backup_profile",
         )
 

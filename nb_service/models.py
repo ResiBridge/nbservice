@@ -55,6 +55,20 @@ class Service(NetBoxModel):
     comments = models.TextField(blank=True)
     backup_profile = models.CharField("Backup Profile", max_length=100, blank=True, null=True)
 
+    # QOL: Status and Criticality fields
+    status = models.CharField(
+        max_length=20,
+        choices=choices.ServiceStatusChoices,
+        default=choices.ServiceStatusChoices.ACTIVE,
+        help_text="Current operational status of the service"
+    )
+    criticality = models.CharField(
+        max_length=20,
+        choices=choices.ServiceCriticalityChoices,
+        default=choices.ServiceCriticalityChoices.MEDIUM,
+        help_text="Business criticality level"
+    )
+
     tags = TaggableManager(
         through="extras.TaggedItem",
         related_name="itsm_service_set",
@@ -124,6 +138,20 @@ class Service(NetBoxModel):
 
     def get_absolute_url(self):
         return reverse("plugins:nb_service:service", kwargs={"pk": self.pk})
+
+    # QOL: Dependency counting methods
+    def get_upstream_count(self):
+        """Count how many services this service depends on (outgoing relations)"""
+        return self.relationships.count()
+
+    def get_downstream_count(self):
+        """Count how many services depend on this service (incoming relations)"""
+        # Count relations where this service's ICs are the destination
+        service_ics = self.config_itens.all()
+        from . models import Relation
+        return Relation.objects.filter(destination__in=service_ics).exclude(
+            service=self
+        ).values('service').distinct().count()
 
 
 class Application(NetBoxModel):

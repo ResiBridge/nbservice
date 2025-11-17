@@ -38,6 +38,8 @@ class ServiceForm(NetBoxModelForm):
         model = models.Service
         fields = [
             "name",
+            "status",
+            "criticality",
             "clients",
             "comments",
             "backup_profile",
@@ -119,18 +121,14 @@ class RelationForm(NetBoxModelForm):
         queryset=models.IC.objects.all(),
         required=True,
         label='Source',
-        query_params={
-            'service_id': '$service',
-        },
+        # Removed query_params to allow cross-service relations
     )
 
     destination = DynamicModelChoiceField(
         queryset=models.IC.objects.all(),
         required=True,
         label='Destination',
-        query_params={
-            'service_id': '$service',
-        },
+        # Removed query_params to allow cross-service relations
     )
 
     link_text = forms.CharField(required=False)

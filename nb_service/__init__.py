@@ -10,7 +10,7 @@ class NbserviceConfig(PluginConfig):
     version = __version__
     author = 'Renato Almeida de Oliveira Zaroubin'
     author_email = 'renato.almeida.oliveira@gmail.com'
-    min_version = "4.2.0"
+    min_version = "4.1.0"
     max_version = "4.2.99"
     required_settings = []
     default_settings = {

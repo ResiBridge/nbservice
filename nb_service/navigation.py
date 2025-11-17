@@ -8,6 +8,11 @@ plugin_settings = settings.PLUGINS_CONFIG["nb_service"]
 menu_buttons = (
     PluginMenuItem(
         permissions=["nb_service.view_service"],
+        link="plugins:nb_service:global_diagram",
+        link_text="Global Diagram",
+    ),
+    PluginMenuItem(
+        permissions=["nb_service.view_service"],
         link="plugins:nb_service:service_list",
         link_text="Services",
     ),

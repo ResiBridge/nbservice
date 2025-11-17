@@ -9,7 +9,7 @@
 | 1.0.7          | < 3.2.1                | 2.10.6; 2.11.12; 3.1.11; 3.2.1 |
 | 2.0.0          | > 3.7.0, < 3.7.8       | 3.7.0, 3.7.4                   |
 | 3.0.0          | > 4.0.0                | 4.0.7                          |
-| 4.0.0          | > 4.1.0                | 4.1.0                          |
+| 4.0.0          | > 4.1.0                | 4.1.0, 4.1.4                   |
 | 4.2.0          | > 4.2.0                | 4.2.0                          |
 
 ## Installation
@@ -29,6 +29,37 @@ Runs /opt/netbox/upgrade.sh
 ```
 sudo /opt/netbox/upgrade.sh
 ```
+
+## Features
+
+### Service Management
+- **Status Tracking**: Track service operational status (Active, Inactive, Deprecated, Planned) with color-coded badges
+- **Criticality Levels**: Assign business criticality (Critical, High, Medium, Low) with visual indicators
+- **Dependency Mapping**: Visualize upstream dependencies and downstream dependents
+- **Auto-IC Creation**: Infrastructure Components are automatically created when new services are added
+- **Quick Actions**: Fast access to create relations and add components via convenient UI buttons
+
+### Global Service Diagram
+Access a centralized view of all service relationships at `/plugins/nb_service/diagram/`
+- Interactive Mermaid.js-powered topology diagram
+- Shows all service dependencies across your infrastructure
+- Clickable nodes to navigate to service details
+
+### Cross-Service Relations
+Create relationships between Infrastructure Components across different services for complete dependency mapping.
+
+### Grafana Integration
+Expose service relationships via REST API for monitoring dashboards:
+- **Endpoint**: `/api/plugins/nb_service/graph/`
+- **Format**: Grafana Node Graph compatible JSON (nodes + edges)
+- Use with Prometheus/cAdvisor metrics for real-time service health visualization
+
+### API Support
+Full REST API access for all plugin features:
+- Services: `/api/plugins/nb_service/services/`
+- Applications: `/api/plugins/nb_service/applications/`
+- Relations: `/api/plugins/nb_service/relations/`
+- Infrastructure Components: `/api/plugins/nb_service/ics/`
 
 ## Configuration
 
