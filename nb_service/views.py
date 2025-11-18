@@ -247,8 +247,8 @@ class GlobalDiagramView(generic.ObjectListView):
         all_relations = models.Relation.objects.all()
 
         for rel in all_relations:
-            src_node = rel.source.service.name.replace(" ", "_")
-            dest_node = rel.destination.service.name.replace(" ", "_")
+            src_node = rel.source.service.name.replace(" ", "_").replace("-", "_")
+            dest_node = rel.destination.service.name.replace(" ", "_").replace("-", "_")
 
             if src_node not in nodes:
                 nodes[src_node] = rel.source.service.get_absolute_url()

@@ -106,13 +106,13 @@ class Service(NetBoxModel):
         arrow_shape = ["-->", "---", "-.->", "-.-"]
         nodes = {}
         for ic in self.config_itens.all():
-            node = ic.name.replace(" ", "_")
+            node = ic.name.replace(" ", "_").replace("-", "_")
             graph += f"{node}\n"
             if node not in nodes:
                 nodes[node] = ic.get_absolute_url()
         for rel in self.relationships.all():
-            src_node = rel.source.name.replace(" ", "_")
-            dest_node = rel.destination.name.replace(" ", "_")
+            src_node = rel.source.name.replace(" ", "_").replace("-", "_")
+            dest_node = rel.destination.name.replace(" ", "_").replace("-", "_")
             if src_node not in nodes:
                 nodes[src_node] = rel.source.get_absolute_url()
             if dest_node not in nodes:
@@ -324,8 +324,8 @@ class Relation(NetBoxModel):
         nodes = {}
         relations = [ self ]
         for rel in relations:
-            src_node = rel.source.name.replace(" ", "_")
-            dest_node = rel.destination.name.replace(" ", "_")
+            src_node = rel.source.name.replace(" ", "_").replace("-", "_")
+            dest_node = rel.destination.name.replace(" ", "_").replace("-", "_")
             if src_node not in nodes:
                 nodes[src_node] = rel.source.get_absolute_url()
             if dest_node not in nodes:
@@ -348,8 +348,8 @@ class Relation(NetBoxModel):
     
     def __str__(self) -> str:
         arrow_shape = ["-->", "---", "-.->", "-.-"]
-        src_node = self.source.name.replace(" ", "_")
-        dest_node = self.destination.name.replace(" ", "_")
+        src_node = self.source.name.replace(" ", "_").replace("-", "_")
+        dest_node = self.destination.name.replace(" ", "_").replace("-", "_")
 
         return f"{src_node} {arrow_shape[self.connector_shape -1]} {dest_node}"
 
