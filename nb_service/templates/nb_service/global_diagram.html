@@ -1,31 +1,261 @@
 {% extends 'generic/object_list.html' %}
 {% load static %}
 
-{% block head %}
-<script src="{% static 'nb_service/mermaid.min.js' %}"></script>
-{% endblock %}
-
 {% block title %}Global Service Diagram{% endblock %}
 
 {% block content %}
+<script src="{% static 'nb_service/mermaid.min.js' %}"></script>
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        flowchart: {
+            useMaxWidth: false,
+            htmlLabels: true,
+            curve: 'basis',
+            nodeSpacing: 500,
+            rankSpacing: 1500,
+            padding: 150,
+            diagramPadding: 100
+        },
+        themeVariables: {
+            fontSize: '40px',
+            fontFamily: 'arial, helvetica, sans-serif',
+            primaryColor: '#fff',
+            primaryTextColor: '#000',
+            primaryBorderColor: '#333',
+            lineColor: '#333',
+            secondaryColor: '#f4f4f4',
+            tertiaryColor: '#fff'
+        }
+    });
+</script>
+<style>
+    /* Full width container */
+    .diagram-container {
+        width: 100%;
+        min-height: 800vh;  /* ABSOLUTELY MASSIVE - 8x screen height! */
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Mermaid diagram styling */
+    .mermaid {
+        text-align: center;
+        width: 100%;
+        min-height: 750vh;  /* INSANELY tall to allow crazy spacing */
+        overflow: visible;
+        padding: 150px;
+        background: #fafafa;
+    }
+
+    /* Make node text GIGANTIC and bold */
+    .mermaid text {
+        font-size: 40px !important;
+        font-weight: 700 !important;
+    }
+
+    /* Make node boxes much bigger and thicker */
+    .mermaid .node rect,
+    .mermaid .node circle,
+    .mermaid .node ellipse,
+    .mermaid .node polygon {
+        stroke-width: 5px !important;
+        min-width: 300px !important;
+        min-height: 100px !important;
+    }
+
+    /* Make arrows thicker */
+    .mermaid .edgePath path {
+        stroke-width: 4px !important;
+    }
+
+    /* Make arrow heads bigger */
+    .mermaid .marker {
+        transform: scale(2);
+    }
+</style>
 <div class="row">
     <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
+        <div class="card diagram-container">
+            <div class="card-header" style="position: relative;">
                 <h5 class="card-title">
                     <i class="mdi mdi-sitemap"></i> Global Service Dependency Diagram
                 </h5>
-            </div>
-            <div class="card-body">
-                <div class="mermaid" style="text-align: center; width: 100%; overflow-x: auto; padding: 20px;">
-                    {{ diagram | safe }}
+                <div style="position: absolute; top: 15px; right: 15px;">
+                    <button class="btn btn-sm btn-outline-primary" onclick="toggleDirection()" id="directionToggle">
+                        <i class="mdi mdi-rotate-90"></i> <span id="directionText">Switch to Top→Down</span>
+                    </button>
                 </div>
-                <div class="text-center mt-3">
-                    <small class="text-muted">Click on any service to view details</small>
+            </div>
+            <div class="card-body" style="overflow: hidden; position: relative; cursor: grab;">
+                <!-- Zoom controls inside diagram area -->
+                <div style="position: absolute; top: 20px; left: 20px; z-index: 1000; display: flex; gap: 5px; background: rgba(255,255,255,0.95); padding: 5px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="zoomIn()" title="Zoom In (or scroll up)">
+                        <i class="mdi mdi-magnify-plus"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="zoomOut()" title="Zoom Out (or scroll down)">
+                        <i class="mdi mdi-magnify-minus"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="resetZoom()" title="Reset View">
+                        <i class="mdi mdi-magnify"></i> Reset
+                    </button>
+                </div>
+                <div id="diagramWrapper" style="transform-origin: 0 0; transition: transform 0.1s ease-out;">
+                    <div class="mermaid" id="diagramContent">
+                        {{ diagram | safe }}
+                    </div>
+                </div>
+                <div class="text-center mt-3" style="position: relative; z-index: 10;">
+                    <small class="text-muted">Scroll to zoom | Drag to pan | Click service to view details</small>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <script src="{% static 'nb_service/export_svg.js' %}"></script>
+<script>
+    // Store current direction in localStorage
+    let currentDirection = localStorage.getItem('diagramDirection') || 'LR';
+
+    // Zoom and Pan variables
+    let scale = 1;
+    let translateX = 0;
+    let translateY = 0;
+    let isDragging = false;
+    let startX, startY;
+
+    const wrapper = document.getElementById('diagramWrapper');
+    const cardBody = wrapper.parentElement;
+
+    // Update button text based on current direction
+    function updateButtonText() {
+        const directionText = document.getElementById('directionText');
+        if (currentDirection === 'LR') {
+            directionText.textContent = 'Switch to Top→Down';
+        } else {
+            directionText.textContent = 'Switch to Left→Right';
+        }
+    }
+
+    function toggleDirection() {
+        // Toggle direction
+        currentDirection = currentDirection === 'LR' ? 'TB' : 'LR';
+        localStorage.setItem('diagramDirection', currentDirection);
+
+        // Reload page with direction parameter
+        const url = new URL(window.location);
+        url.searchParams.set('direction', currentDirection);
+        window.location.href = url.toString();
+    }
+
+    // Apply transform to wrapper
+    function applyTransform() {
+        wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }
+
+    // Zoom functions
+    function zoomIn() {
+        scale *= 1.2;
+        applyTransform();
+    }
+
+    function zoomOut() {
+        scale /= 1.2;
+        applyTransform();
+    }
+
+    function resetZoom() {
+        scale = 1;
+        translateX = 0;
+        translateY = 0;
+        applyTransform();
+    }
+
+    // Mouse wheel zoom
+    cardBody.addEventListener('wheel', function(e) {
+        e.preventDefault();
+
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        const newScale = scale * delta;
+
+        // Get mouse position relative to the diagram
+        const rect = cardBody.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        // Adjust translation to zoom towards mouse position
+        translateX = mouseX - (mouseX - translateX) * (newScale / scale);
+        translateY = mouseY - (mouseY - translateY) * (newScale / scale);
+
+        scale = newScale;
+        applyTransform();
+    }, { passive: false });
+
+    // Pan with mouse drag
+    cardBody.addEventListener('mousedown', function(e) {
+        // Don't interfere with clicking on nodes/links
+        if (e.target.closest('.node') || e.target.closest('.edgePath')) {
+            return;
+        }
+
+        isDragging = true;
+        startX = e.clientX - translateX;
+        startY = e.clientY - translateY;
+        cardBody.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+
+        translateX = e.clientX - startX;
+        translateY = e.clientY - startY;
+        applyTransform();
+    });
+
+    document.addEventListener('mouseup', function() {
+        isDragging = false;
+        cardBody.style.cursor = 'grab';
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === '+' || e.key === '=') {
+            e.preventDefault();
+            zoomIn();
+        } else if (e.key === '-' || e.key === '_') {
+            e.preventDefault();
+            zoomOut();
+        } else if (e.key === '0') {
+            e.preventDefault();
+            resetZoom();
+        }
+    });
+
+    // Check if we need to update direction on page load
+    window.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlDirection = urlParams.get('direction');
+
+        if (urlDirection) {
+            currentDirection = urlDirection;
+            localStorage.setItem('diagramDirection', currentDirection);
+        }
+
+        updateButtonText();
+
+        // If stored direction doesn't match current diagram, reload
+        const diagramContent = document.getElementById('diagramContent').textContent.trim();
+        const isLR = diagramContent.startsWith('graph LR');
+        const isTB = diagramContent.startsWith('graph TB');
+
+        if ((currentDirection === 'LR' && isTB) || (currentDirection === 'TB' && isLR)) {
+            const url = new URL(window.location);
+            url.searchParams.set('direction', currentDirection);
+            window.location.href = url.toString();
+        }
+    });
+</script>
 {% endblock %}

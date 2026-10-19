@@ -77,7 +77,7 @@ class Service(NetBoxModel):
 
     @property
     def diagram(self):
-        graph = "graph TB\n"
+        graph = "graph LR\n"
         open_shape = [
             "(",
             "([",
@@ -294,7 +294,7 @@ class Relation(NetBoxModel):
     
     @property
     def diagram(self):
-        graph = "graph TB\n"
+        graph = "graph LR\n"
         open_shape = [
             "(",
             "([",

@@ -237,7 +237,12 @@ class GlobalDiagramView(generic.ObjectListView):
 
     def get_extra_context(self, request):
         # Generate Mermaid diagram with ALL services and relations
-        graph = "graph TB\n"
+        # Support both LR (left-right) and TB (top-bottom) directions
+        direction = request.GET.get('direction', 'LR')
+        if direction not in ['LR', 'TB']:
+            direction = 'LR'
+
+        graph = f"graph {direction}\n"
         open_shape = ["(", "([", "[[", "[(", "((", ">", "{", "{{", "[/", "[/"]
         close_shape = [")", "])", "]]", ")]", "))", "]", "}", "}}", "/]", "\\]"]
         arrow_shape = ["-->", "---", "-.->", "-.-"]

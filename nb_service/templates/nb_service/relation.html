@@ -3,13 +3,9 @@
 {% load static %}
 {% load render_table from django_tables2 %}
 
-{% block head %}
-<script src="{% static 'nb_service/mermaid.min.js' %}"></script>
-{% endblock %}
-
-
-
 {% block content %}
+<script src="{% static 'nb_service/mermaid.min.js' %}"></script>
+<script>mermaid.initialize({ startOnLoad: true });</script>
 <div class="row">
     <div class="col col-md-6">
         <div class="card">
