@@ -36,6 +36,7 @@ class ServiceView(generic.ObjectView):
 @register_model_view(models.Service, name='IC')
 class ServiceICView(generic.ObjectChildrenView):
     queryset = models.Service.objects.all()
+    child_model = models.IC
     table = tables.ICTable
     template_name = "nb_service/service_IC_view.html"
     tab = ViewTab(label='IC', badge=lambda obj: obj.config_itens.all().count(), hide_if_empty=True)

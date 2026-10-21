@@ -1,13 +1,6 @@
 from django.urls import path, include
 from utilities.urls import get_model_urls
 
-from django.conf import settings
-from packaging import version
-
-
-NETBOX_CURRENT_VERSION = version.parse(settings.VERSION)
-
-
 from . import views
 from . import models
 

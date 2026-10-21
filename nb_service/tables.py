@@ -1,5 +1,3 @@
-from django.conf import settings
-from packaging import version
 import django_tables2 as tables
 
 

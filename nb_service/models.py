@@ -1,8 +1,6 @@
 #
 
 # Django imports
-from django.conf import settings
-from packaging import version
 from django.db import models
 from django.urls import reverse
 from django.contrib.postgres.fields import ArrayField
@@ -101,7 +99,7 @@ class Service(NetBoxModel):
             "}",
             "}}",
             "/]",
-            "\]",
+            "\\]",
         ]
         arrow_shape = ["-->", "---", "-.->", "-.-"]
         nodes = {}
@@ -132,6 +130,9 @@ class Service(NetBoxModel):
         for node in nodes:
             graph += f'click {node} "{nodes[node]}"\n'
         return graph
+
+    class Meta:
+        ordering = ("name",)
 
     def __str__(self) -> str:
         return f"{self.name}"
@@ -185,6 +186,9 @@ class Application(NetBoxModel):
         through="extras.TaggedItem",
         related_name="itsm_application_set",
     )
+
+    class Meta:
+        ordering = ("name", "version")
 
     def get_absolute_url(self):
         return reverse("plugins:nb_service:application", kwargs={"pk": self.pk})
@@ -248,6 +252,7 @@ class IC(NetBoxModel):
         super().validate_unique(exclude=exclude)
 
     class Meta:
+        ordering = ("service", "pk")
         unique_together = [
             ["service", "assigned_object_type", "assigned_object_id"],
         ]
@@ -275,6 +280,9 @@ class Relation(NetBoxModel):
     )
 
     link_text = models.CharField("Link Text", max_length=100)
+
+    class Meta:
+        ordering = ("service", "pk")
 
     @property
     def source_shape_name(self):
@@ -318,7 +326,7 @@ class Relation(NetBoxModel):
             "}",
             "}}",
             "/]",
-            "\]",
+            "\\]",
         ]
         arrow_shape = ["-->", "---", "-.->", "-.-"]
         nodes = {}
@@ -368,3 +376,6 @@ class PenTest(NetBoxModel):
     date = models.DateField("Execution Date", blank=True)
     ticket = models.CharField("Ticket", max_length=100)
     report_link = models.CharField("Report link", max_length=100)
+
+    class Meta:
+        ordering = ("service", "-date", "pk")

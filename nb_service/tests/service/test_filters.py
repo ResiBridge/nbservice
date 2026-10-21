@@ -1,7 +1,10 @@
 from django.test import TestCase
 
 from tenancy.models import Tenant
-from utilities.testing import ChangeLoggedFilterSetTests
+try:  # NetBox >= 4.7 renamed the mixin
+    from utilities.testing import ChangeLoggedFilterSetTestMixin as ChangeLoggedFilterSetTests
+except ImportError:  # NetBox < 4.7
+    from utilities.testing import ChangeLoggedFilterSetTests
 
 from nb_service.models import Service
 from nb_service.filtersets import ServiceFilterSet

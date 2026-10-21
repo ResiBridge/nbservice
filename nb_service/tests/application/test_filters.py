@@ -1,6 +1,9 @@
 from django.test import TestCase
 
-from utilities.testing import ChangeLoggedFilterSetTests
+try:  # NetBox >= 4.7 renamed the mixin
+    from utilities.testing import ChangeLoggedFilterSetTestMixin as ChangeLoggedFilterSetTests
+except ImportError:  # NetBox < 4.7
+    from utilities.testing import ChangeLoggedFilterSetTests
 from virtualization.models import VirtualMachine, ClusterType, Cluster
 from dcim.models import Device, DeviceRole, Manufacturer, DeviceType, Site
 from ipam.choices import ServiceProtocolChoices
